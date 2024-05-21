@@ -1,0 +1,17 @@
+////////////////////////////////////////////////////////////////////////////////////////
+//                                                                                    //
+// ImageAsCode exporter v1.0 - Image pixel data exported as an array of bytes         //
+//                                                                                    //
+// more info and bugs-report:  github.com/raysan5/raylib                              //
+// feedback and support:       ray[at]raylib.com                                      //
+//                                                                                    //
+// Copyright (c) 2018-2023 Ramon Santamaria (@raysan5)                                //
+//                                                                                    //
+////////////////////////////////////////////////////////////////////////////////////////
+
+// Image data information
+#define RAYGAMEICON_WIDTH    -1392100664
+#define RAYGAMEICON_HEIGHT   32759
+#define RAYGAMEICON_FORMAT   689          // raylib internal pixel format
+
+static unsigned char RAYGAMEICON_DATA[0] = { 0x0 };
