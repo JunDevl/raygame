@@ -29,6 +29,8 @@ endif()
 add_executable(${PROJECT_NAME} src/main.cpp)
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
+target_include_directories(${PROJECT_NAME} PUBLIC resources/include)
+target_link_directories(${PROJECT_NAME} PRIVATE src)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
