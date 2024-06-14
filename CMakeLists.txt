@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.11) # FetchContent is available in 3.11+
 
 project(raygame)
 
+set(CMAKE_CXX_VERSION 17)
+
 # Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -26,11 +28,12 @@ endif()
 
 # Our Project
 
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp 
+                               src/general.cpp
+                               src/pong.cpp)
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
 target_include_directories(${PROJECT_NAME} PUBLIC resources/include)
-target_link_directories(${PROJECT_NAME} PRIVATE src)
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
