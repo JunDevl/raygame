@@ -81,7 +81,7 @@ Scene::~Scene() {
 }
 
 void Scene::InitGame() {
-	// Since i'm planning to do different games, there's this switch statement to initialize every game's entities to its own defined class (i fell like i'm doing something utterly disgusting, sorry :<)
+	// Since i'm planning to do different games, there's this switch statement to initialize every game's entities to its own defined class (i feel like i'm doing something utterly disgusting, sorry :<)
 	switch(Scene::gamestate) {
 		case Scene::Gamestate::pong:
 			p1 = new Paddle(Paddle::left_side, 255, false);
