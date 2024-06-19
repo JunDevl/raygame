@@ -14,16 +14,53 @@ struct Button {
 	const char* text;
 	const char* text_font = "Calibri";
 	int font_size = 20;
-	TextOrientation text_orientation = top_left;
+	TextOrientation text_orientation = center;
 	Color text_color = BLACK;
 	float border_thickness = 5;
 	Color border_color = BLUE;
 
 	void DrawButton() {
-		Rectangle border = {rect.x - border_thickness, rect.y - border_thickness, rect.width + border_thickness * 2, rect.height + border_thickness * 2};
+
+		Rectangle border = {rect.x - border_thickness, 
+							rect.y - border_thickness, 
+							rect.width + border_thickness * 2, 
+							rect.height + border_thickness * 2};
+
 		if (border_thickness != 0) DrawRectangleRec(border, border_color);
+
 		DrawRectangleRec(rect, inner_color);
-		DrawText(text, rect.x + rect.width * 0.2, rect.y, font_size, text_color);
+
+		const Vector2 text_dim = MeasureTextEx(GetFontDefault(), text, font_size, font_size/10);
+
+		switch (text_orientation) {
+			case top:
+				DrawText(text, (rect.x + (rect.width/2)) - text_dim.x/2, rect.y, font_size, text_color);
+				break;
+			case top_right:
+				DrawText(text, (rect.x + rect.width) - text_dim.x, rect.y, font_size, text_color);
+				break;
+			case right:
+				DrawText(text, (rect.x + rect.width) - text_dim.x, rect.y + (rect.height/2) - (text_dim.y/2), font_size, text_color);
+				break;
+			case bottom_right:
+				DrawText(text, (rect.x + rect.width) - text_dim.x, rect.y + rect.height - text_dim.y, font_size, text_color);
+				break;
+			case bottom:
+				DrawText(text, (rect.x + (rect.width/2)) - text_dim.x/2, rect.y + rect.height - text_dim.y, font_size, text_color);
+				break;
+			case bottom_left:
+				DrawText(text, rect.x, rect.y + rect.height - text_dim.y, font_size, text_color);
+				break;
+			case left:
+				DrawText(text, rect.x, rect.y + (rect.height/2) - (text_dim.y/2), font_size, text_color);
+				break;
+			case top_left:
+				DrawText(text, rect.x, rect.y, font_size, text_color);
+				break;
+			case center:
+				DrawText(text, (rect.x + (rect.width/2)) - (text_dim.x/2), rect.y + (rect.height/2) - (text_dim.y/2), font_size, text_color);
+				break;
+		}
 	}
 };
 
@@ -42,6 +79,30 @@ struct Scene::Menu {
 	Button play_btn = {{buttons_xpos, buttons_init_ypos, buttons_width, buttons_height}, buttons_color, "Play Game"};
 	Button options_btn = {{buttons_xpos, play_btn.rect.y + buttons_offset, buttons_width, buttons_height}, buttons_color, "Options"};
 	Button quit_btn = {{buttons_xpos, options_btn.rect.y + buttons_offset, buttons_width, buttons_height}, buttons_color, "Quit Game"};
+
+	void UpdateSelection() {
+		if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) 
+			cursor = cursor == 0 ? 2 : cursor - 1;
+                
+		if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) 
+			cursor = cursor == 2 ? 0 : cursor + 1;
+
+		const int mousex = GetMouseX();
+		const int mousey = GetMouseY();
+
+		if ((mousex >= play_btn.rect.x && mousey >= play_btn.rect.y) && 
+			(mousex <= play_btn.rect.x + play_btn.rect.width && mousey <= play_btn.rect.y + play_btn.rect.height))
+			cursor = 0;
+
+		if ((mousex >= options_btn.rect.x && mousey >= options_btn.rect.y) && 
+			(mousex <= options_btn.rect.x + options_btn.rect.width && mousey <= options_btn.rect.y + options_btn.rect.height))
+			cursor = 1;
+
+		if ((mousex >= quit_btn.rect.x && mousey >= quit_btn.rect.y) && 
+			(mousex <= quit_btn.rect.x + quit_btn.rect.width && mousey <= quit_btn.rect.y + quit_btn.rect.height))
+			cursor = 2;
+
+	}
 
 	void RenderButtons() {
 		switch (cursor) {
@@ -73,31 +134,34 @@ Scene::Scene(float &wwidth, float &wheight) {
     Scene::window_height = &wheight;
     gamestate = Scene::Gamestate::mainmenu;
 	menu_instance = new Menu();
-	p1 = nullptr, p2 = nullptr;
 }
 
 Scene::~Scene() {
-	delete menu_instance, p1, p2;
+	delete menu_instance, p1, p2, p3, p4, ball;
 }
 
 void Scene::InitGame() {
 	// Since i'm planning to do different games, there's this switch statement to initialize every game's entities to its own defined class (i feel like i'm doing something utterly disgusting, sorry :<)
-	switch(Scene::gamestate) {
-		case Scene::Gamestate::pong:
-			p1 = new Paddle(Paddle::left_side, 255, false);
-			p2 = new Paddle(Paddle::right_side, 255, false);
-			break;
+	if (in_game == false) {
+		switch(gamestate) {
+			case Scene::Gamestate::pong:
+				p1 = new Paddle(Paddle::left, 255, false);
+				p2 = new Paddle(Paddle::right, 255, false);
+				ball = new Ball();
+
+				in_game = true;
+				
+				break;
+		}
 	}
+	return;
 }
 
 void Scene::Logic() {
 	HandleInput();
 
+	// Switch case here just in case i want to create more games other than pong for example
 	switch (Scene::gamestate) {
-		case Scene::Gamestate::mainmenu:
-			break; // HandleInput will handle everything menu-related
-		case Scene::Gamestate::pausemenu:
-			break; // HandleInput will handle everything menu-related
 		case Scene::Gamestate::pong:
 			/* -- to-do: calculate sin and cos of ball and collisions -- */
 			break;
@@ -107,15 +171,12 @@ void Scene::Logic() {
 void Scene::HandleInput() {
     switch (gamestate) {
         case Scene::Gamestate::mainmenu:
-            if (IsKeyPressed(KEY_ENTER) && menu_instance->cursor == 0 && p1 == nullptr) {
+            if ((IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) && menu_instance->cursor == 0 && p1 == nullptr) {
 				gamestate = Scene::Gamestate::pong;
 				InitGame();
-            }
-            if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) 
-				menu_instance->cursor = menu_instance->cursor == 0 ? 2 : menu_instance->cursor - 1;
-                
-            if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) 
-				menu_instance->cursor = menu_instance->cursor == 2 ? 0 : menu_instance->cursor + 1;
+			}
+
+			menu_instance->UpdateSelection();
 
 			std::cout << menu_instance->cursor << std::endl;
 
@@ -127,30 +188,33 @@ void Scene::HandleInput() {
             ////////////////
             // GAME INPUT //
 			////////////////
-
+			Paddle* base_p1 = dynamic_cast<Paddle*>(p1);
+			Paddle* base_p2 = dynamic_cast<Paddle*>(p2);
             // Workarround to "fix" dragging window problem (to prevent the paddle from going offscreen if you do an input while dragging the window)
-            if (p1->GetY() < 0) {
+			/*
+			if (p1->GetY() < 0) {
                 p1->SetY(0);
             } else if (p2->GetY() < 0) {
                 p2->SetY(0);
             }
-
-            if (p1->GetY() + p1->GetHeight() > *window_height) {
-                p1->SetY(*window_height - p1->GetHeight());
-            } else if (p2->GetY() + p2->GetHeight() > *window_height) {
-                p2->SetY(*window_height - p2->GetHeight());
+			
+            if (base_p1->GetY() + base_p1->GetHeight() > *window_height) {
+                base_p1->SetY(*window_height - base_p1->GetHeight());
+            } else if (base_p2->GetY() + base_p2->GetHeight() > *window_height) {
+                base_p2->SetY(*window_height - base_p2->GetHeight());
             }
+			*/
 
             // Game input logic
-            if ((IsKeyDown(KEY_W) && !IsKeyDown(KEY_S)) && p1->GetY() >= 0) 
-				p1->SetY(p1->GetY() - p1->GetSpeed() * GetFrameTime());
-            if ((IsKeyDown(KEY_S) && !IsKeyDown(KEY_W)) && p1->GetY() + p1->GetHeight() <= *window_height) 
-                p1->SetY(p1->GetY() + p1->GetSpeed() * GetFrameTime());
+            if ((IsKeyDown(KEY_W) && !IsKeyDown(KEY_S)) && base_p1->GetY() >= 0) 
+				base_p1->SetY(base_p1->GetY() - base_p1->GetSpeed() * GetFrameTime());
+            if ((IsKeyDown(KEY_S) && !IsKeyDown(KEY_W)) && base_p1->GetY() + base_p1->GetHeight() <= *window_height) 
+                base_p1->SetY(base_p1->GetY() + base_p1->GetSpeed() * GetFrameTime());
 
-            if ((IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN)) && p2->GetY() >= 0) 
-                p2->SetY(p2->GetY() - p2->GetSpeed() * GetFrameTime());
-            if ((IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP)) && p2->GetY() + p2->GetHeight() <= *window_height) 
-                p2->SetY(p2->GetY() + p2->GetSpeed() * GetFrameTime());
+            if ((IsKeyDown(KEY_UP) && !IsKeyDown(KEY_DOWN)) && base_p2->GetY() >= 0) 
+                base_p2->SetY(base_p2->GetY() - base_p2->GetSpeed() * GetFrameTime());
+            if ((IsKeyDown(KEY_DOWN) && !IsKeyDown(KEY_UP)) && base_p2->GetY() + base_p2->GetHeight() <= *window_height) 
+                base_p2->SetY(base_p2->GetY() + base_p2->GetSpeed() * GetFrameTime());
             
             break;
     }
@@ -172,8 +236,11 @@ void Scene::Draw() {
 		case Scene::Gamestate::pong:
 			ClearBackground(GRAY);
 
-			DrawRectangle(p1->GetX(), p1->GetY(), p1->GetWidth(), p1->GetHeight(), WHITE);
-			DrawRectangle(p2->GetX(), p2->GetY(), p2->GetWidth(), p2->GetHeight(), WHITE);
+			Paddle* base_p1 = dynamic_cast<Paddle*>(p1);
+			Paddle* base_p2 = dynamic_cast<Paddle*>(p2);
+
+			DrawRectangle(base_p1->GetX(), base_p1->GetY(), base_p1->GetWidth(), base_p1->GetHeight(), WHITE);
+			DrawRectangle(base_p2->GetX(), base_p2->GetY(), base_p2->GetWidth(), base_p2->GetHeight(), WHITE);
 
 			DrawCircle(GetWindowWidth()/2, GetWindowHeight()/2, 10, WHITE);
 
@@ -184,12 +251,12 @@ void Scene::Draw() {
 	}
 }
 
-void Scene::SetWindowWidth(float &width) {
-    Scene::window_width = &width;
+void Scene::SetWindowWidth(float *width) {
+    Scene::window_width = width;
 }
 
-void Scene::SetWindowHeight(float &height) {
-    Scene::window_height = &height;
+void Scene::SetWindowHeight(float *height) {
+    Scene::window_height = height;
 }
 
 float Scene::GetWindowWidth() {

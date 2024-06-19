@@ -17,21 +17,22 @@ public:
     Scene(float &wwidth, float &wheight);
     ~Scene();
 
+    bool in_game = false;
+
     void InitGame();
     void Logic();
     void HandleInput();
     void Draw();
 
-    static void SetWindowWidth(float &width);
-    static void SetWindowHeight(float &height);
+    static void SetWindowWidth(float *width);
+    static void SetWindowHeight(float *height);
     static float GetWindowWidth();
     static float GetWindowHeight();
 
-    Paddle *p1;
-    Paddle *p2;
+    Entity *p1 = nullptr, *p2 = nullptr, *p3 = nullptr, *p4 = nullptr, *ball = nullptr;
 
 private:
     inline static float *window_width = nullptr, *window_height = nullptr;
     Menu *menu_instance;
-    
+
 };
