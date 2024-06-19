@@ -8,7 +8,7 @@
 
 class Scene {
 public:
-    enum class Gamestate {mainmenu, pausemenu, pong};
+    enum class Gamestate {mainmenu, pausemenu, ponggame};
     enum class Gamemode {pvp, pve};
     Gamestate gamestate;
     Gamemode gamemode;

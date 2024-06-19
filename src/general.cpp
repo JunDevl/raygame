@@ -144,7 +144,7 @@ void Scene::InitGame() {
 	// Since i'm planning to do different games, there's this switch statement to initialize every game's entities to its own defined class (i feel like i'm doing something utterly disgusting, sorry :<)
 	if (in_game == false) {
 		switch(gamestate) {
-			case Scene::Gamestate::pong:
+			case Scene::Gamestate::ponggame:
 				p1 = new Paddle(Paddle::left, 255, false);
 				p2 = new Paddle(Paddle::right, 255, false);
 				ball = new Ball();
@@ -160,9 +160,8 @@ void Scene::InitGame() {
 void Scene::Logic() {
 	HandleInput();
 
-	// Switch case here just in case i want to create more games other than pong for example
 	switch (Scene::gamestate) {
-		case Scene::Gamestate::pong:
+		case Scene::Gamestate::ponggame:
 			/* -- to-do: calculate sin and cos of ball and collisions -- */
 			break;
 	}
@@ -172,7 +171,7 @@ void Scene::HandleInput() {
     switch (gamestate) {
         case Scene::Gamestate::mainmenu:
             if ((IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) && menu_instance->cursor == 0 && p1 == nullptr) {
-				gamestate = Scene::Gamestate::pong;
+				gamestate = Scene::Gamestate::ponggame;
 				InitGame();
 			}
 
@@ -183,29 +182,11 @@ void Scene::HandleInput() {
             break;
         case Scene::Gamestate::pausemenu:
             break;
-        case Scene::Gamestate::pong:
-		
-            ////////////////
-            // GAME INPUT //
-			////////////////
+        case Scene::Gamestate::ponggame:
+
 			Paddle* base_p1 = dynamic_cast<Paddle*>(p1);
 			Paddle* base_p2 = dynamic_cast<Paddle*>(p2);
-            // Workarround to "fix" dragging window problem (to prevent the paddle from going offscreen if you do an input while dragging the window)
-			/*
-			if (p1->GetY() < 0) {
-                p1->SetY(0);
-            } else if (p2->GetY() < 0) {
-                p2->SetY(0);
-            }
-			
-            if (base_p1->GetY() + base_p1->GetHeight() > *window_height) {
-                base_p1->SetY(*window_height - base_p1->GetHeight());
-            } else if (base_p2->GetY() + base_p2->GetHeight() > *window_height) {
-                base_p2->SetY(*window_height - base_p2->GetHeight());
-            }
-			*/
-
-            // Game input logic
+    
             if ((IsKeyDown(KEY_W) && !IsKeyDown(KEY_S)) && base_p1->GetY() >= 0) 
 				base_p1->SetY(base_p1->GetY() - base_p1->GetSpeed() * GetFrameTime());
             if ((IsKeyDown(KEY_S) && !IsKeyDown(KEY_W)) && base_p1->GetY() + base_p1->GetHeight() <= *window_height) 
@@ -233,7 +214,7 @@ void Scene::Draw() {
 			break;
 		case Scene::Gamestate::pausemenu:
 			break;
-		case Scene::Gamestate::pong:
+		case Scene::Gamestate::ponggame:
 			ClearBackground(GRAY);
 
 			Paddle* base_p1 = dynamic_cast<Paddle*>(p1);
