@@ -5,8 +5,9 @@ class Entity {
 public:
     virtual float GetX();
     virtual float GetY();
-    virtual void SetX(float value);
-    virtual void SetY(float value);
+    virtual int GetSpeed();
+    virtual void SetX(float x);
+    virtual void SetY(float y);
 
 protected:
     int e_speed;
@@ -15,21 +16,28 @@ protected:
 
 class Paddle : public Entity {
 public:
-    enum { left_side, right_side };
-    Paddle(int side, int speed, bool isbot);
+    enum Side { left, right };
+    Paddle(Side side, int speed, bool isbot);
     float GetWidth();
     float GetHeight();
-    void SetWidth(float value);
-    void SetHeight(float value);
-    int GetSpeed();
+    void SetWidth(float new_width);
+    void SetHeight(float new_heigth);
     Rectangle GetRekt();
 
 private:
     float width, height;
     bool is_bot;
-    int side, score;
+    Side side;
+    int score;
 
 };
-class Ball;
+class Ball : public Entity {
+public:
+    float GetAngle();
+    void SetAngle(float new_angle);
+
+private:
+    float angle;
+};
 class Tile;
 class Score;

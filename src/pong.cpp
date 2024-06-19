@@ -9,23 +9,33 @@ float Entity::GetY() {
 	return ypos;
 }
 
-void Entity::SetX(float value) {
-	xpos = value;
+void Entity::SetX(float x) {
+	if (x >= 0 && x < Scene::GetWindowWidth()) {
+		xpos = x;
+	}
+	return;
 }
 
-void Entity::SetY(float value) {
-	ypos = value;
+void Entity::SetY(float y) {
+	if (y >= -1 && y < Scene::GetWindowHeight()) {
+		ypos = y;
+	}
+	return;
 }
 
-Paddle::Paddle(int side, int speed, bool isbot) : side(side), 
+int Entity::GetSpeed() {
+	return e_speed;
+}
+
+Paddle::Paddle(Side side, int speed, bool isbot) : side(side), 
 												  is_bot(isbot), 
 												  width(Scene::GetWindowWidth() * 0.01), 
-												  height(Scene::GetWindowHeight() / 6) 
+												  height(Scene::GetWindowHeight() * 0.23) 
 												  {
 
 	e_speed = speed;
 
-	xpos = side == left_side ? Scene::GetWindowWidth() * 0.01 : Scene::GetWindowWidth() * 0.98;
+	xpos = side == left ? Scene::GetWindowWidth() * 0.01 : Scene::GetWindowWidth() * 0.98;
 	ypos = (Scene::GetWindowHeight()/2) - (height/2);
 
 };
@@ -38,14 +48,10 @@ float Paddle::GetHeight() {
 	return height;
 }
 
-void Paddle::SetWidth(float value) {
-	width = value;
+void Paddle::SetWidth(float new_width) {
+	width = new_width;
 }
 
-void Paddle::SetHeight(float value) {
-	height = value;
-}
-
-int Paddle::GetSpeed() {
-	return e_speed;
+void Paddle::SetHeight(float new_height) {
+	height = new_height;
 }
