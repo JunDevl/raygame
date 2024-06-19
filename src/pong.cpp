@@ -17,7 +17,7 @@ void Entity::SetX(float x) {
 }
 
 void Entity::SetY(float y) {
-	if (y >= -1 && y < Scene::GetWindowHeight()) {
+	if (y >= 0 && y < Scene::GetWindowHeight()) {
 		ypos = y;
 	}
 	return;
