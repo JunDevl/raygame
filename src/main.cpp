@@ -21,7 +21,11 @@ int main() {
 
 	while(!WindowShouldClose()) {
 		if (IsWindowResized()) {
-			std::cout << "asdfasdfasdf";
+			window_width = GetScreenWidth();
+			window_height = GetScreenHeight();
+			std::cout << window_width << std::endl;
+			std::cout << window_height << std::endl;
+			SetWindowSize(window_width, window_height);
 		}
 		scene.Logic();
 		scene.Draw();
